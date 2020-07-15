@@ -8,7 +8,7 @@ from collections import Counter
 from datetime import datetime
 
 
-# Implement contraction using Counter objects
+
 class Graph(object):
     def __init__(self, vlist):
         self.verts = {v[0]: Counter(v[1:]) for v in vlist}
@@ -21,11 +21,11 @@ class Graph(object):
             self.edges += ([(k, t) for t in v.keys() for n in range(v[t]) if k < t])
 
     @property
-    def vertex_count(self):
+    def vertexCount(self):
         return len(self.verts)
 
     @property
-    def edge_count(self):
+    def edgeCount(self):
         return len(self.edges)
 
     def merge_vertices(self, edge_index):
@@ -53,51 +53,49 @@ class Graph(object):
         self.update_edges()
 
 
+
 def contract(graph, min_v=2):
     g = copy.deepcopy(graph)
-    while g.vertex_count > min_v:
-        r = random.randrange(0, g.edge_count)
+    while g.vertexCount > min_v:
+        r = random.randrange(0, g.edgeCount)
         g.merge_vertices(r)
 
     return g
 
 
-# Karger's Algorithm
-# For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
-def min_cut(graph):
-    m = graph.edge_count
-    n = graph.vertex_count
-    for i in range(int(n * (n - 1) * math.log(n) / 2)):
+
+def minCut(graph):
+    edge = graph.edgeCount
+    vertex = graph.vertexCount
+    for i in range(int(vertex * (vertex - 1) * math.log(vertex) / 2)):
         random.seed(datetime.now())
         g = contract(graph)
-        m = min(m, g.edge_count)
-        # print(i, m)
-    return m
+        edge = min(edge, g.edgeCount)
+    return edge
 
 
-def _fast_min_cut(graph):
-    if graph.vertex_count <= 6:
-        return min_cut(graph)
+
+def fastMinCut(graph):
+    if graph.vertexCount <= 6:
+        return minCut(graph)
     else:
-        t = math.floor(1 + graph.vertex_count / math.sqrt(2))
+        t = math.floor(1 + graph.vertexCount / math.sqrt(2))
         g1 = contract(graph, t)
         g2 = contract(graph, t)
 
-        return min(_fast_min_cut(g1), _fast_min_cut(g2))
+        return min(fastMinCut(g1), fastMinCut(g2))
 
 
-# Karger Stein algorithm. Refer https://en.wikipedia.org/wiki/Karger%27s_algorithm#Karger.E2.80.93Stein_algorithm
-# For failure probabilty upper bound of 1/n, repeat the algorithm nlogn/(n - 1) times
-def fast_min_cut(graph):
-    m = graph.edge_count
-    n = graph.vertex_count
-    for i in range(int(n * math.log(n) / (n - 1))):
+
+def findMinimum(graph):
+    edge = graph.edgeCount
+    vertex = graph.vertexCount
+    for i in range(int(vertex * math.log(vertex) / (vertex - 1))):
         random.seed(datetime.now())
-        m = min(m, _fast_min_cut(graph))
-        # print(i, m)
-    return m
+        edge = min(edge, fastMinCut(graph))
+    return edge
 
 
-# Simple test
-graph = Graph([[1, 2, 3], [2, 1, 3, 4], [3, 1, 2, 4], [4, 2, 3]])
-print("minimum cut(s) = " + str(fast_min_cut(graph)))
+
+graph = Graph([[1, 2, 3, 4], [2, 1, 3, 4], [3, 1, 2, 4], [4, 2, 3, 1]])
+print("minimum cut(s) = " + str(findMinimum(graph)))
